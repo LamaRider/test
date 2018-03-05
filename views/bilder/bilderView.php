@@ -4,6 +4,20 @@ use yii\widgets\LinkPager;
 ?>
 <h1>Bilder von <?php echo Html::encode("{$redditsearch->Name}");?></h1>
 	<?php 
+	
+	$request = Yii::$app->request;
+	//$mode = 'desktop';
+	
+	if(!empty($request->userAgent)){
+		if(preg_match('/iPhone|Android/', $request->userAgent) == 1)
+		{
+			//echo 'IF Mobile, User Agent: ' . $request->userAgent;
+			$mode = 'mobile';
+		}
+	}
+	
+	//echo 'User Agent: ' . $request->userAgent;
+	
 	foreach ($bilders as $bilder):
 	?>
 			
@@ -93,27 +107,53 @@ use yii\widgets\LinkPager;
 		
 		<?php
 		elseif (preg_match('/\.webm/', $bilder->Bild) == 1 && preg_match('/gfycat\.com/', $bilder->Bild) == 0):	
+			if(empty($mode)):
 		?>
-			<video width='800px' controls="true">
+			<video width='700px' controls="true">
+				<source src="<?= Html::encode("{$bilder->Bild}") ?>" type="video/webm">
+			</video>
+			<br>
+			
+		<?php 
+			else:	
+		?>
+			<video width='300px' controls="true">
 				<source src="<?= Html::encode("{$bilder->Bild}") ?>" type="video/webm">
 			</video>
 			<br>
 		
-		
 		<?php 
-		elseif (preg_match('/\.mp4/', $bilder->Bild) == 1 && preg_match('/gfycat\.com/', $bilder->Bild) == 0):	
+			endif;
+		elseif (preg_match('/\.mp4/', $bilder->Bild) == 1 && preg_match('/gfycat\.com/', $bilder->Bild) == 0):
+			if(empty($mode)):
 		?>
-			<video width='800px' controls="true">
+			<video width='700px' controls="true">
 				<source src="<?= Html::encode("{$bilder->Bild}") ?>" type="video/mp4">
 			</video>
 			<br>
+		
+		<?php 
+			else:	
+		?>
+			<video width='300px' controls="true">
+				<source src="<?= Html::encode("{$bilder->Bild}") ?>" type="video/mp4">
+			</video>
+			<br>			
+			
 		<?php
-		elseif(preg_match('/\.jpg|\.png|\.gif/',$bilder->Bild)==1):		
+			endif;
+		elseif(preg_match('/\.jpg|\.png|\.gif/',$bilder->Bild)==1):
+			if(empty($mode)):
 		?>	
 			<img src="<?= Html::encode("{$bilder->Bild}") ?>" alt="Leer: <?= Html::encode("{$bilder->Bild}") ?>" style="width:600px">			
-			<br>		
-			
+			<br>
 		<?php 
+			else:	
+		?>			
+			<img src="<?= Html::encode("{$bilder->Bild}") ?>" alt="Leer: <?= Html::encode("{$bilder->Bild}") ?>" style="width:300px">			
+			<br>
+		<?php
+			endif;
 		else:	
 		?>
 			<div>

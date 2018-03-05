@@ -228,12 +228,6 @@ class RedditCrawler
 	*/
 	function save_pictures($postList, $subredditId){
 		
-		/*foreach($postList as &$post){
-			$post[0]=utf8_decode($post[0]);
-			$post[1]=utf8_decode($post[1]);
-			$post[2]=utf8_decode($post[2]);
-		}*/
-		
 		foreach($postList as $post){
 			$query = Bilder::find();       
 			$result = $query->where(['Thread' => $post[1]])
