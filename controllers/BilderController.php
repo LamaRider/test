@@ -15,13 +15,25 @@ class BilderController extends Controller
 {
 	public function actionShowmenu()
     {
-        //$crawler = new RedditCrawler;
-		//$list = $crawler->get_List();
+        $query = Reddit::find();
 		
-		$query = Reddit::find();
+        //$reddits = $query->orderBy(['name' => 'LOWER'])
+        //    ->all();
+				
+		$result = Yii::$app->db->createCommand('SELECT * FROM reddit ORDER BY LOWER(name)')
+            ->queryAll();
 		
-        $reddits = $query->orderBy('name')
-            ->all();
+		foreach($result as $post){
+			$reddit = new Reddit;
+			$reddit->ID = $post['ID'];
+			$reddit->Name = $post['Name'];
+			$reddit->URL = $post['URL'];
+			$reddit->LAST_TIME = $post['LAST_TIME'];
+			$reddit->Last_Image = $post['Last_Image'];
+			
+			$reddits[] = $reddit;
+		}
+		
 		
 		$addRedditForm = new AddredditForm();
 		
@@ -39,11 +51,6 @@ class BilderController extends Controller
             'reddits' => $reddits,
 			'model' => $addRedditForm
         ]);
-		
-		/*
-		return $this->render('TestPage', [
-            'list' => $list,           
-        ]);*/		
     }
 	
     public function actionShowpics($reddit = 4)
@@ -52,7 +59,7 @@ class BilderController extends Controller
 
         $pagination = new Pagination([
             'defaultPageSize' => 5,
-            'totalCount' => $query->count(),
+            'totalCount' => $query->count()/5,
         ]);
 
         $bilders = $query->where(['Subreddit'=>$reddit])

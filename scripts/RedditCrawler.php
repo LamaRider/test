@@ -4,6 +4,7 @@ namespace app\scripts;
 
 use app\models\Bilder;
 use app\models\Reddit;
+use app\models\Fehler;
 
 class RedditCrawler 
 {
@@ -252,7 +253,17 @@ class RedditCrawler
 				$bilder->Datum = $post[2];
 				$bilder->Title = $post[3];
 				$bilder->Subreddit = $subredditId;
-				$bilder->save();
+				
+				try{
+					$bilder->save();
+				}
+				catch (\yii\db\Exception $e)
+				{
+					$fehler = new Fehler();
+					$fehler->Thread = $post[1];
+					$fehler->Bild = $post[0];
+					$fehler->Subreddit = $subredditId;
+				}
 				
 			}			 
 		}		
