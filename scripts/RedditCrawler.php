@@ -77,7 +77,45 @@ class RedditCrawler
 		$htmlString = $this->load_http_site($reddit->URL, true);
 		$postList = $this-> crawl_reddit_html($htmlString);
 		$postList = $this->remove_non_pic_posts($postList);
+		
+		/*if(is_array($postList)== true){
+			echo $postList[0][0];
+			echo ' ';
+			echo $postList[0][1];
+			echo ' ';
+			echo $postList[0][2];
+			echo ' ';
+			echo $postList[0][3];
+			echo ' ';
+			echo $postList[1][0];
+			echo ' ';
+			echo $postList[1][1];
+			echo ' ';
+			echo $postList[1][2];
+			echo ' ';
+			echo $postList[1][3];
+			echo ' ';
+			echo $postList[2][0];
+			echo ' ';
+			echo $postList[2][1];
+			echo ' ';
+			echo $postList[2][2];
+			echo ' ';
+			echo $postList[2][3];
+			echo ' ';
+			echo ' Länge: ';
+			echo count($postList);		
+
+			foreach($postList as $test){
+				
+			}
+			
+		}*/
+		
+		
+		
 		$nextPage = $this->get_next_site_link($htmlString);
+		
 		
 		$this->save_pictures($postList/*Finished*/, $reddit->ID);
 		return $nextPage;
@@ -194,7 +232,7 @@ class RedditCrawler
 			if($post[0] != $post[1]){
 				$remainingPosts[] = array($post[0], 'https://www.reddit.com'.$post[1], $post[2], $post[3]);
 			}
-		}
+		}		
 		return $remainingPosts;
 	}
 	
@@ -226,41 +264,44 @@ class RedditCrawler
 	/*
 		Speichert die gesuchten Bilder nur wenn diese noch nicht vorhanden sind
 	*/
-	function save_pictures($postList, $subredditId){
+	function save_pictures($postList = null, $subredditId){
 		
-		foreach($postList as $post){
+		if(is_array($postList) == true){
+			
+			foreach($postList as $post){
 			$query = Bilder::find();       
 			$result = $query->where(['Thread' => $post[1]])
 				->one();
 			
 			
-			if(empty($result)){
-								
-				//gifv entfernen
-				if(preg_match('/\.gifv/', $post[0]) == 1){
-					$post[0] = str_replace("gifv","gif",$post[0]);
-				}
+				if(empty($result)){
+									
+					//gifv entfernen
+					if(preg_match('/\.gifv/', $post[0]) == 1){
+						$post[0] = str_replace("gifv","gif",$post[0]);
+					}
+					
+					$bilder = new Bilder();
+					$bilder->Thread = $post[1];
+					$bilder->Bild = $post[0];
+					$bilder->Datum = $post[2];
+					$bilder->Title = $post[3];
+					$bilder->Subreddit = $subredditId;
+					
+					try{
+						$bilder->save();
+					}
+					catch (\yii\db\Exception $e)
+					{
+						$fehler = new Fehler();
+						$fehler->Thread = $post[1];
+						$fehler->Bild = $post[0];
+						$fehler->Subreddit = $subredditId;
+					}
 				
-				$bilder = new Bilder();
-				$bilder->Thread = $post[1];
-				$bilder->Bild = $post[0];
-				$bilder->Datum = $post[2];
-				$bilder->Title = $post[3];
-				$bilder->Subreddit = $subredditId;
-				
-				try{
-					$bilder->save();
-				}
-				catch (\yii\db\Exception $e)
-				{
-					$fehler = new Fehler();
-					$fehler->Thread = $post[1];
-					$fehler->Bild = $post[0];
-					$fehler->Subreddit = $subredditId;
-				}
-				
-			}			 
-		}		
+				}		 
+			}
+		}
 	}
 	
 	
